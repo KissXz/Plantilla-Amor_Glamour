@@ -10,9 +10,13 @@ import {
   Button,
 } from "reactstrap";
 
+import Swal from "sweetalert2";
+
 
 
 function Horario() {
+  
+
   return (
     <>
 <div className="Content content">
@@ -40,7 +44,7 @@ function Horario() {
               <td className="text-right">$36,738</td>
               <td>Carrera 23</td>
               <td><Button id="btnEditar" className="btn btn-warning" style={{padding : 15, margin: 10}}>Editar</Button>
-              <Button id="btnEliminar" className="btn btn-danger" style={{padding : 15, margin: 10}}>Eliminar</Button>
+              {/* <BotonConAlerta cb={onConfirmDelete}></BotonConAlerta> */}
               </td>
             </tr>
           </tbody>

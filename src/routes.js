@@ -53,7 +53,7 @@ var routes = [
   },
   {
     path: "/cliente",
-    name: "Clientes",
+    name: "Gestion de clientes",
     icon: "nc-icon nc-single-02",
     component: <Cliente />,
     layout: "/admin",
