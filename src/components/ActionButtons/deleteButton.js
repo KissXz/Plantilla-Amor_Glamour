@@ -7,11 +7,12 @@ const BotonEliminar = ({ cb }) => {
       title: "¿Estas seguro?",
       text: "Esta acción es irrevertible!",
       icon: "warning",
-      showCancelButton: true,
+      showCancelButton: false,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       cancelButtonText: "Cancelar",
       confirmButtonText: "Si, eliminarlo!",
+      onConfirm: cb
     }).then((result) => {
       if (result.isConfirmed) {
         cb().then(() => {
@@ -19,6 +20,8 @@ const BotonEliminar = ({ cb }) => {
             title: "Eliminado!",
             text: "El registro ha sido eliminado.",
             icon: "success",
+          }).then(() =>{
+            window.location.reload();
           });
         });
       }
