@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import "../assets/css/switch.css";
+import BotonEliminar from "components/ActionButtons/deleteButton";
+import BotonActualizar from "components/ActionButtons/editButton";
+import SearchBar from "components/SearchBar/SearchBar";
 import {
   Card,
   CardHeader,
@@ -17,6 +20,8 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  ListGroup,
+  ListGroupItem,
 } from "reactstrap";
 
 function Cliente() {
@@ -120,7 +125,9 @@ function Cliente() {
   });
   const [modalCrearOpen, setModalCrearOpen] = useState(false);
   const [modalEditarOpen, setModalEditarOpen] = useState(false);
+  const [modalDetallesOpen, setModalDetallesOpen] = useState(false);
   const [ClienteEditando, setClienteEditando] = useState(null);
+  const [ClienteDetalles, setClienteDetalles] = useState(null);
 
   const handleChangeNuevoCliente = (e) => {
     const { name, value } = e.target;
@@ -167,7 +174,12 @@ function Cliente() {
     }
   };
 
-  const actualizarCliente = async () => {
+  const actualizarCliente = async (
+    ClienteEditando,
+    data,
+    setData,
+    setModalEditarOpen
+  ) => {
     try {
       if (!ClienteEditando || !ClienteEditando.idCliente) {
         throw new Error("El Cliente o su ID no están definidos");
@@ -182,19 +194,8 @@ function Cliente() {
       );
       setData(newData);
       setModalEditarOpen(false);
-
-      Swal.fire({
-        title: "Éxito!",
-        text: "El Cliente se ha actualizado correctamente.",
-        icon: "success",
-      });
     } catch (error) {
       console.error("Error al actualizar el Cliente:", error);
-      Swal.fire({
-        title: "Error!",
-        text: "Ocurrió un error al actualizar el Cliente.",
-        icon: "error",
-      });
     }
   };
 
@@ -208,7 +209,6 @@ function Cliente() {
           text: "El estado del cliente ha sido cambiado.",
           icon: "success",
         });
-
       })
       .catch((error) => {
         console.error("Error al cambiar el estado del Cliente:", error);
@@ -223,6 +223,34 @@ function Cliente() {
     } catch (error) {
       console.error("Error al obtener los Clientes:", error);
       setIsLoadingClientes(false);
+    }
+  };
+
+    const [filteredData, setFilteredData] = useState(data);
+  
+    useEffect(() => {
+      setFilteredData(data); // Inicializa filteredData con data cuando data cambie
+    }, [data]);
+
+  const eliminarCliente = async (idCliente) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:3001/eliminarCliente/${idCliente}`
+      );
+      console.log("Cliente eliminado:", response.data);
+      fetchData(); // Volver a cargar los datos después de la eliminación
+      Swal.fire({
+        title: "Eliminado!",
+        text: "El cliente ha sido eliminado.",
+        icon: "success",
+      });
+    } catch (error) {
+      console.error("Error al eliminar el cliente:", error);
+      Swal.fire({
+        title: "Error!",
+        text: "Ocurrió un error al eliminar el cliente.",
+        icon: "error",
+      });
     }
   };
 
@@ -255,12 +283,9 @@ function Cliente() {
                     </svg>
                     Crear Cliente
                   </Button>
-                  <Input style={{ marginLeft: 500 }} placeholder="Buscar..." />
-                  <InputGroupAddon addonType="append">
-                    <InputGroupText>
-                      <i className="nc-icon nc-zoom-split" />
-                    </InputGroupText>
-                  </InputGroupAddon>
+                  <div>
+                    <SearchBar data={data} setFilteredData={setFilteredData} />
+                  </div>
                 </InputGroup>
               </div>
             </CardTitle>
@@ -273,10 +298,10 @@ function Cliente() {
                   <th>Número</th>
                   <th>Nombre</th>
                   <th>Apellido</th>
-                  <th>Fecha Nacimiento</th>
+                  <th hidden>Fecha Nacimiento</th>
                   <th>Email</th>
-                  <th>Dirección</th>
-                  <th>Celular</th>
+                  <th hidden>Dirección</th>
+                  <th hidden>Celular</th>
                   <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
@@ -288,10 +313,10 @@ function Cliente() {
                     <td>{cliente.numIdentificacionCliente}</td>
                     <td>{cliente.nombreCliente}</td>
                     <td>{cliente.apellidoCliente}</td>
-                    <td>{cliente.fechaNacimientoCliente}</td>
+                    <td hidden>{cliente.fechaNacimientoCliente}</td>
                     <td>{cliente.emailCliente}</td>
-                    <td>{cliente.direccionCliente}</td>
-                    <td>{cliente.celularCliente}</td>
+                    <td hidden>{cliente.direccionCliente}</td>
+                    <td hidden>{cliente.celularCliente}</td>
                     <td>
                       <label class="switch">
                         <input
@@ -317,8 +342,32 @@ function Cliente() {
                       >
                         <i
                           className="nc-icon nc-ruler-pencil"
-                          style={{ marginRight: "5px" }}
+                          style={{ marginRight: "5px", marginTop: 3 }}
                         />
+                      </Button>
+                      <Button
+                        color="primary"
+                        style={{
+                          marginLeft: 100,
+                          marginTop: -55,
+                          marginBottom: 5,
+                        }}
+                        onClick={() => {
+                          setClienteDetalles(cliente);
+                          setModalDetallesOpen(true);
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="currentColor"
+                          class="bi bi-card-list"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z" />
+                          <path d="M5 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 5 8m0-2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m0 5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-1-5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0M4 8a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m0 2.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                        </svg>
                       </Button>
                     </td>
                   </tr>
@@ -603,11 +652,74 @@ function Cliente() {
           </InputGroup>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" onClick={actualizarCliente}>
-            Guardar Cambios
-          </Button>{" "}
-          <Button color="secondary" onClick={() => setModalEditarOpen(false)}>
+          <BotonActualizar
+            actualizarCliente={actualizarCliente}
+            ClienteEditando={ClienteEditando}
+            data={data}
+            setData={setData}
+            setModalEditarOpen={setModalEditarOpen}
+          />
+          <Button color="danger" onClick={() => setModalEditarOpen(false)}>
             Cancelar
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal
+        isOpen={modalDetallesOpen}
+        toggle={() => setModalDetallesOpen(false)}
+      >
+        <ModalHeader toggle={() => setModalDetallesOpen(false)}>
+          Detalles del Cliente
+        </ModalHeader>
+        <ModalBody>
+          {ClienteDetalles && (
+            <div>
+              <p>
+                <strong>ID:</strong> {ClienteDetalles.idCliente}
+              </p>
+              <p>
+                <strong>Tipo de Identificación:</strong>{" "}
+                {ClienteDetalles.tipoIdentificacionCliente}
+              </p>
+              <p>
+                <strong>Identificación:</strong>{" "}
+                {ClienteDetalles.numIdentificacionCliente}
+              </p>
+              <p>
+                <strong>Nombre:</strong> {ClienteDetalles.nombreCliente}
+              </p>
+              <p>
+                <strong>Apellido:</strong> {ClienteDetalles.apellidoCliente}
+              </p>
+              <p>
+                <strong>Fecha de Nacimiento:</strong>{" "}
+                {ClienteDetalles.fechaNacimientoCliente}
+              </p>
+              <p>
+                <strong>Email:</strong> {ClienteDetalles.emailCliente}
+              </p>
+              <p>
+                <strong>Dirección:</strong> {ClienteDetalles.direccionCliente}
+              </p>
+              <p>
+                <strong>Celular:</strong> {ClienteDetalles.celularCliente}
+              </p>
+              <p style={{ color: "blue" }}>
+                <strong>Estado:</strong>{" "}
+                {ClienteDetalles.estado ? "Activo" : "Inactivo"}
+              </p>
+              <div style={{ marginTop: 45, marginLeft: 125 }}>
+                <BotonEliminar
+                  onDelete={() => eliminarCliente(ClienteDetalles.idCliente)}
+                />
+              </div>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={() => setModalDetallesOpen(false)}>
+            Cerrar
           </Button>
         </ModalFooter>
       </Modal>
